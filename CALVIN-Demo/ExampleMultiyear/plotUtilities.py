@@ -85,7 +85,7 @@ dfCost=pd.DataFrame({'Urban' : np.array(costUrbanRegion),
                  'Agriculture' :np.array(costAgriRegion)})
 dfCost.index= ['SC', 'TB', 'SJSB', 'LSVD', 'USV']
 
-## Plotting scarsity curve
+## Plotting storage cost
 regions = ['SC', 'TB', 'SJSB', 'LSVD', 'USV']
 costUrban = np.array( dfCost.Urban)/1e6
 costAgriculture = np.array(dfCost.Agriculture)/1e6
