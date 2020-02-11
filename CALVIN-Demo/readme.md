@@ -1,6 +1,7 @@
-Universirsity of California, Merced
+Internal Demo of the CALVIN model
+University of California, Merced
 
-Water System Management Lab
+Water Systems Management Lab
 
 Internal CALVIN demo
 
