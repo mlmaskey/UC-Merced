@@ -2,7 +2,7 @@
 """
 Created on Mon Feb 10 10:22:25 2020
 
-@author: Water Management Lab
+@author: Mahesh Maskey
 """
 import pandas as pd
 def read_combine(yearList, param): 
