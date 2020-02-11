@@ -18,7 +18,7 @@ def read_combine(yearList, param):
       
     F.to_csv('result/' + param + '.csv', index=True)
     
-yearList = [i for i in range(1990, 2005)]
+yearList = [i for i in range(1990, 2004)]
 read_combine(yearList, 'dual_lower')
 read_combine(yearList, 'dual_node')
 read_combine(yearList, 'dual_upper')
