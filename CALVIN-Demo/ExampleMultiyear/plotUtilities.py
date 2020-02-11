@@ -51,21 +51,11 @@ storage = pd.read_csv(fp + '/storage.csv', index_col=0, parse_dates=True)
 dataStorage = storage.filter(regex='SR_')
 # surface water reservoir behind the dam
 srFOL =dataStorage.filter(regex ='_FOL')
-
 srFOL = np.array(srFOL)
-#plotSeries(dateString, srFOL, 'Storage, TAF', 
-#           ttleStr = 'Surface water storage behind the Folsom Dam', 
-#           saveFigName =  'Graphs/FolsomSR.png')
 
 # groundwater reservoir behind the dam
 gwFOL =storage.filter(regex ='GW_09')
-
 gwFOL = np.array(gwFOL)
-#plotSeries(dateString, gwFOL, 'Storage, TAF', 
-#           ttleStr = 'Groundwater storage at Basin 9 near Folsom', 
-#           saveFigName =  'Graphs/FolsomGW.png')
-
-
 
 dfData=pd.DataFrame({'ST' : np.ndarray.flatten(srFOL), 
                  'GW' : np.ndarray.flatten(gwFOL)})
