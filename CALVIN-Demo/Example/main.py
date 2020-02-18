@@ -1,5 +1,4 @@
 from calvin import *
-from postprocessor import *
 
 # specify data file
 calvin = CALVIN('links_infeasible.csv')
