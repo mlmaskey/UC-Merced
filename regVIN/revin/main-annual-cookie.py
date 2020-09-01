@@ -3,8 +3,8 @@ from postREVIN import*
 eop = None
 beginYear = 1922
 endYear = 2003
-dataDir = r'D:\PostDocResearch\UC Merced\importCALVIN\NOAA\runRechargeCookie'
-saveDir = 'Results/runRechargeCookie'
+dataDir = 'data/runRechargeCookie'
+saveDir = '../Results/runRechargeCookie'
 
 for i in range(beginYear,endYear):
 

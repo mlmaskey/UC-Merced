@@ -3,7 +3,7 @@ from postREVIN import*
 eop = None
 beginYear = 1922
 endYear = 2004
-dataDir = r'D:\PostDocResearch\UC Merced\importCALVIN\NOAA\runBaseRegion'
+dataDir = 'data/runBaseRegion'
 saveDir = '../Results/runBaseRegion'
 iNboundNode = ['C37', 'C301', 'C307', 'A204', 'A207', 'C20', 'C67', 'D43',
                'D42', 'HSU204C67', 'HSD204', 'D509', 'HGR08']
