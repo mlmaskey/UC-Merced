@@ -83,6 +83,9 @@ def postprocess(df, model, resultdir=None, annual=False):
   F,S,E,SV,SC = {}, {}, {}, {}, {}
   D_up,D_lo,D_node = {}, {}, {}
   EOP_storage = {}
+  valFobj = {} # for storing objective function value
+  valTarget = {} # for storing target demand
+  valCost = {} # for storing unit cost
 
   links = df.values
   nodes = pd.unique(df[['i','j']].values.ravel()).tolist()
@@ -111,7 +114,7 @@ def postprocess(df, model, resultdir=None, annual=False):
     else:
       continue
 
-    # sum over piecewise components
+      # sum over piecewise components
     if is_storage_node:
       key = n1
       evap = (1 - amplitude)*float(v)/amplitude
@@ -126,8 +129,8 @@ def postprocess(df, model, resultdir=None, annual=False):
         ub = float(link[6])
         unit_cost = float(link[3])
         if (ub - v) > 1e-6: # if there is a shortage
-          dict_insert(SV, key, t1, ub-v, 'sum')
-          dict_insert(SC, key, t1, -1*unit_cost*(ub-v), 'sum')
+          dict_insert(SV, key, t1, ub-v, 'sum') 
+          dict_insert(SC, key, t1, -1*unit_cost*(ub-v), 'sum') 
         else:
           dict_insert(SV, key, t1, 0.0, 'sum')
           dict_insert(SC, key, t1, 0.0, 'sum')
@@ -135,7 +138,11 @@ def postprocess(df, model, resultdir=None, annual=False):
     # open question: what to do about duals on pumping links? Is this handled?
     dict_insert(D_up, key, t1, d1, 'last')
     dict_insert(D_lo, key, t1, d2, 'first')
-
+    unit_cost = float(link[3])
+    dict_insert(valFobj, key, t1, v*unit_cost, 'sum')
+    dict_insert(valCost, key, t1, unit_cost, 'first') 
+    ub = float(link[6])
+    dict_insert(valTarget, key, t1, ub, 'first')
 
   # get dual values for nodes (mass balance)
   for node in nodes:
@@ -160,7 +167,8 @@ def postprocess(df, model, resultdir=None, annual=False):
   things_to_save = [(F, 'flow'), (S, 'storage'), (D_up, 'dual_upper'), 
                     (D_lo, 'dual_lower'), (D_node, 'dual_node'),
                     (E,'evaporation'), (SV,'shortage_volume'),
-                    (SC,'shortage_cost')]
+                    (SC,'shortage_cost'), (valFobj,'ObjectiveValue'),
+                    (valCost,'unitCost'), (valTarget, 'TargetValue')]
 
   for data,name in things_to_save:
     #save_dict_as_csv(data, resultdir + '/' + name + '.csv', mode)
@@ -207,3 +215,53 @@ def aggregate_regions(fp):
   sc.to_csv(fp + '/shortage_cost.csv')
   sv.to_csv(fp + '/shortage_volume.csv')
   flow.to_csv(fp + '/flow.csv')
+
+
+def model_to_dataframe(m):
+      """
+      Converts the model to a pandas dataframe. 
+      Useful for computing objective values (costs) without having to postprocess.
+      
+      :returns model_df: (Pandas dataframe) Dataframe of upper_bound, cost, 
+        and flow (solution) values for each link
+      """
+      # dataframe of the model flows
+      model_x = pd.concat(axis=1, objs=[
+        pd.DataFrame(m.X.keys(), columns=['i','j','k']),
+        pd.DataFrame([m.X[value].value for value in m.X.keys()], 
+          columns=['flow'])]).set_index(['i','j','k'])
+      
+      # dataframe of the model upper bounds
+      model_l = pd.concat(axis=1, objs=[
+        pd.DataFrame(m.l.keys(), columns=['i','j','k']),
+        pd.DataFrame([m.l[value].value for value in m.l.keys()], 
+          columns=['lower_bound'])]).set_index(['i','j','k'])
+
+      # dataframe of the model upper bounds
+      model_u = pd.concat(axis=1, objs=[
+        pd.DataFrame(m.u.keys(), columns=['i','j','k']),
+        pd.DataFrame([m.u[value].value for value in m.u.keys()], 
+          columns=['upper_bound'])]).set_index(['i','j','k'])
+
+      # dataframe of the model costs
+      model_c = pd.concat(axis=1, objs=[
+        pd.DataFrame(m.c.keys(), columns=['i','j','k']),
+        pd.DataFrame([m.c[value] for value in m.c.keys()], 
+          columns=['cost'])]).set_index(['i','j','k'])
+#    # dataframe of lower dual
+#      model_ld = pd.concat(axis=1, objs=[
+#        pd.DataFrame(m.limit_lower.keys(), columns=['i','j','k']),
+#        pd.DataFrame([m.ld[value] for value in m.ld.keys()], 
+#          columns=['cost'])]).set_index(['i','j','k'])    
+#    
+#     model_ld = pd.DataFrame(m.ld.keys(), columns=['i','j','k']),
+#     pd.DataFrame([m.ld[value] for value in m.ld.keys()],
+#                   columns=['lower_dual'])]).set_index(['i','j','k'])
+
+#    d2 = model.dual[model.limit_upper[s]] if s in model.limit_upper else 0.0
+      # join together flows, costs, and bounds
+      model_df = model_x.join(model_c, how='inner').join(model_l).join(model_u).reset_index()
+      model_df['link'] = model_df.i.map(str) + '-' + model_df.j.map(str) + '-' + model_df.k.map(str)
+      model_df.set_index('link', inplace=True)
+
+      return model_df  
