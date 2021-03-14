@@ -51,9 +51,8 @@ def read_combine(yearList, param,resultdir):
       
     F.to_csv(resultdir + '/' + param + '.csv', index=True)
     
-yearList = [i for i in range(1922, 2005)]
-#yearList = [i for i in range(0, 9)]
-resultDir ='Results/runRecharge_region_V4A'
+yearList = [i for i in range(1922, 2005)] # Change the period of data
+resultDir ='Results/runBase' # Change the folder of model results
 read_combine(yearList, 'dual_lower', resultDir)
 read_combine(yearList, 'dual_node', resultDir)
 read_combine(yearList, 'dual_upper', resultDir)
