@@ -4,9 +4,9 @@ from calvin.postprocessor import *
 eop = None
 beginYear = 1922
 endYear = 1925
-dataDir = 'calvin/data/runBase'
-saveDir = 'Results/runBase_test'
-debugDir = 'Results/DebugedrunBase_test'
+dataDir = 'calvin/data/runBase' # Scenario name
+saveDir = 'Results/runBase'
+debugDir = 'Results/DebugedrunBase'
 
 for i in range(beginYear, endYear):
     print('\nNowT running WY %d' % i)
